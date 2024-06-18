@@ -1,4 +1,5 @@
 package org.example;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -25,6 +26,7 @@ public class PrisonManagementSystem {
 }
 
 class Menu {
+    private Log logger;
     private Scanner scanner;
 
     public Menu(Scanner scanner) {
@@ -55,31 +57,32 @@ class Menu {
         return scanner.nextLine();
     }
 
-    public void handleInput(int choice, PrisonSystem prisonSystem, Scanner scanner) {
+                                            //полиморфизм
+    public void handleInput(int choice,  PrisonSystem prisonSystem, Scanner scanner) {
         switch (choice) {
             case 1:
                 prisonSystem.registerPrisoner();
                 break;
             case 2:
-                prisonSystem.conductRandomSearch();
+                PrisonSystem.conductRandomSearch();
                 break;
             case 3:
                 prisonSystem.provideMeal();
                 break;
             case 4:
-                prisonSystem.calculateVariableSentenceDuration();
+                PrisonSystem.calculateVariableSentenceDuration();
                 break;
             case 5:
-                prisonSystem.assignWork();
+                PrisonSystem.assignWork();
                 break;
             case 6:
-                prisonSystem.transferPrisonerToRandomCell();
+                PrisonSystem.transferPrisonerToRandomCell();
                 break;
             case 7:
-                prisonSystem.releasePrisoner();
+                PrisonSystem.releasePrisoner();
                 break;
             case 8:
-                prisonSystem.conductInterrogation();
+                PrisonSystem.conductInterrogation();
                 break;
             case 9:
                 prisonSystem.conductExercise();
@@ -91,10 +94,10 @@ class Menu {
                 prisonSystem.conductCounselingSession();
                 break;
             case 12:
-                prisonSystem.exitProgram();
+                PrisonSystem.exitProgram();
                 break;
             default:
-                prisonSystem.printCustomMessage("Некорректный выбор.");
+                PrisonSystem.printCustomMessage("Некорректный выбор.");
         }
     }
 }
@@ -110,15 +113,22 @@ abstract class Person {
     }
 }
 class Prisoner extends Person{
+    static Log my_log;
+    static {
+        try {
+            my_log = new Log("prisoner_logger");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private int id;
 
+    //конструктор
     public Prisoner(String name) {
         super(name);
         this.id = generateId();
-    }
-
-    public String getName() {
-        return name;
+        my_log.logger.info("Creating prisoner with name: " + name);
+        my_log.logger.warning("Prisoner created with ID: " + id);
     }
 
     public int getId() {
@@ -129,10 +139,20 @@ class Prisoner extends Person{
     }
 }
 class Food {
+    static Log my_log2;
+    static {
+        try {
+            my_log2 = new Log("food_logger");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private String name;
 
+    //конструктор
     public Food(String name) {
         this.name = name;
+        my_log2.logger.info("Creating food with name: " + name);
     }
 
     public String getName() {
@@ -141,17 +161,33 @@ class Food {
 }
 
 class PrisonSystem {
+    private Log logger;
+
+    public PrisonSystem() {
+        try {
+            logger = new Log("prison_system_logger");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //конструктор
     private Scanner scanner = new Scanner(System.in);
 
     public void registerPrisoner() {
-        System.out.println("Введите данные нового заключенного:");
-        String input = scanner.nextLine();
-        if (isValidName(input)) {
-            Prisoner prisoner = new Prisoner(input);
-            System.out.println("Заключенный " + prisoner.getName() + " зарегистрирован. ID: " + prisoner.getId());
-        } else {
-            System.out.println("Неверный ввод. Пожалуйста, введите имя заключенного.");
-            registerPrisoner();
+        try {
+            System.out.println("Введите данные нового заключенного:");
+            String input = scanner.nextLine();
+            if (isValidName(input)) {
+                Prisoner prisoner = new Prisoner(input);
+                System.out.println("Заключенный " + prisoner.getName() + " зарегистрирован. ID: " + prisoner.getId());
+            } else {
+                System.out.println("Неверный ввод. Пожалуйста, введите имя заключенного.");
+                registerPrisoner();
+            }
+            logger.logger.info("Registering prisoner...");
+        } catch (Exception e) {
+            logger.logger.severe("Error registering prisoner", e);
         }
     }
 
@@ -235,7 +271,7 @@ class PrisonSystem {
             System.out.println("Контрабанды не найдено.");
         }
     }
-
+                               //полиморфизм
         private void provideFood(Food food) {
             System.out.println("Выдаем: " + food.getName());
         }
